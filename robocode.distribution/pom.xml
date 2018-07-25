@@ -40,6 +40,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 			<version>${project.version}</version>
 			<type>jar</type>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.robocode</groupId>
+			<artifactId>robocode.slick</artifactId>
+			<version>${project.version}</version>
+			<type>jar</type>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
