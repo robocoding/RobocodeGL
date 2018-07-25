@@ -11,3 +11,5 @@ ucdetector_reports
 .recommenders
 .sonarlint
 .idea
+slick/libs
+slick/native

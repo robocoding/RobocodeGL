@@ -1,0 +1,4 @@
+# Slick 2D configuration
+
+Currently you'll need to copy lwjgl.jar and slick.jar manually from slick 2d distribution into ./libs/jar,
+and *.so, *.dll, *.dylib files into ./libs/native
