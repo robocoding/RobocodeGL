@@ -154,13 +154,13 @@ public class WindowManager implements IWindowManagerExt {
 	}
 
 	public void showRobocodeFrame(boolean visible, boolean iconified) {
-    TestSlick slick = Container.getComponent(TestSlick.class);
+    TestSlick slick = new TestSlick();
 
-    if (slick != null) {
+    // if (slick != null) {
       slick.hi();
-    } else {
-      throw new IllegalStateException("SLICK NOT FOUND");
-    }
+    // } else {
+    //   throw new IllegalStateException("SLICK NOT FOUND");
+    // }
 
     RobocodeFrame frame = getRobocodeFrame();
 
