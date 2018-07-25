@@ -8,6 +8,7 @@
 package net.sf.robocode.ui;
 
 
+import io.github.robocoding.TestSlick;
 import net.sf.robocode.battle.BattleProperties;
 import net.sf.robocode.battle.BattleResultsTableModel;
 import net.sf.robocode.battle.IBattleManager;
@@ -140,12 +141,14 @@ public class WindowManager implements IWindowManagerExt {
 	}
 
 	public void showRobocodeFrame(boolean visible, boolean iconified) {
+		Container.getComponent(TestSlick.class);
+
 		RobocodeFrame frame = getRobocodeFrame();
 
 		if (iconified) {
 			frame.setState(Frame.ICONIFIED);
 		}
-		
+
 		if (visible) {
 			// Pack frame to size all components
 			WindowUtil.packCenterShow(frame);
