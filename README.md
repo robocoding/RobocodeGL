@@ -1,3 +1,6 @@
+# RobocodeGL
+RebocodeGL is a hardware accelerated version of Robocode
+
 # Robocode
 #### *Build the best - destroy the rest!*
 
