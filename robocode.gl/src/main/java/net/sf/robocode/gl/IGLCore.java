@@ -6,4 +6,6 @@ public interface IGLCore {
 	Canvas getCanvas();
 
 	void exit();
+
+	void show();
 }

@@ -1,19 +1,21 @@
 package net.sf.robocode.gl;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglAWTCanvas;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 
 import java.awt.*;
 
 public final class GLCore implements IGLCore {
-	private final LwjglAWTCanvas canvas;
+	private LwjglAWTCanvas canvas;
 
-	public GLCore() {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+	private static final LwjglApplicationConfiguration config;
 
-		float width = 400;
-		float height = 300;
+	static {
+		config = new LwjglApplicationConfiguration();
+
+		float width = 800;
+		float height = 600;
 
 		config.width = (int) width;
 		config.height = (int) height;
@@ -21,13 +23,16 @@ public final class GLCore implements IGLCore {
 		config.vSyncEnabled = true;
 		config.title = "Robocode OpenGL";
 		config.samples = 4;
+	}
 
-		// new LwjglApplication(new MyGdxGame(), config);
-		canvas = new LwjglAWTCanvas(new MyGdxGame(), config);
+	public GLCore() {
 	}
 
 	@Override
 	public Canvas getCanvas() {
+		if (canvas == null) {
+			canvas = new LwjglAWTCanvas(new MyGdxGame(), config);
+		}
 		return canvas.getCanvas();
 	}
 
@@ -42,5 +47,10 @@ public final class GLCore implements IGLCore {
 		// });
 
 		System.exit(0);
+	}
+
+	@Override
+	public void show() {
+		new LwjglApplication(new MyGdxGame(), config);
 	}
 }
