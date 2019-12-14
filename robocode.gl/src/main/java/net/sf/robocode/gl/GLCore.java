@@ -26,6 +26,7 @@ public final class GLCore implements IGLCore {
 	}
 
 	public GLCore() {
+		getCanvas();
 	}
 
 	@Override

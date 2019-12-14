@@ -25,6 +25,7 @@ import robocode.control.snapshot.IRobotSnapshot;
 import robocode.control.snapshot.ITurnSnapshot;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
@@ -33,8 +34,8 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
 import java.lang.reflect.Method;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 
 /**
@@ -97,17 +98,18 @@ public class RobocodeFrame extends JFrame {
 
 	final List<RobotButton> robotButtons = new ArrayList<RobotButton>();
 	private FileDropHandler fileDropHandler;
+	private boolean canvasInitialized;
 
 	public RobocodeFrame(ISettingsManager properties,
-			IWindowManager windowManager,
-			IRobotDialogManager dialogManager,
-			IVersionManager versionManager,
-			IBattleManager battleManager,
-			IRecordManager recordManager,
-			InteractiveHandler interactiveHandler,
-			MenuBar menuBar,
-			BattleView battleView
-			) {
+	                     IWindowManager windowManager,
+	                     IRobotDialogManager dialogManager,
+	                     IVersionManager versionManager,
+	                     IBattleManager battleManager,
+	                     IRecordManager recordManager,
+	                     InteractiveHandler interactiveHandler,
+	                     MenuBar menuBar,
+	                     BattleView battleView
+	) {
 		this.windowManager = (IWindowManagerExt) windowManager;
 		this.properties = properties;
 		this.interactiveHandler = interactiveHandler;
@@ -175,7 +177,7 @@ public class RobocodeFrame extends JFrame {
 			if (Version.compare(newVersion, currentVersion) > 0) {
 				newVersionAvailable = true;
 				if (Version.isFinal(newVersion)
-						|| (Version.isBeta(newVersion) && properties.getOptionsCommonNotifyAboutNewBetaVersions())) {
+					|| (Version.isBeta(newVersion) && properties.getOptionsCommonNotifyAboutNewBetaVersions())) {
 					showNewVersion(newVersion, false);
 				}
 			}
@@ -197,7 +199,7 @@ public class RobocodeFrame extends JFrame {
 
 	private void showLatestVersion(String version) {
 		JOptionPane.showMessageDialog(this, "You have version " + version + ".  This is the latest version of Robocode.",
-				"No update available", JOptionPane.INFORMATION_MESSAGE);
+			"No update available", JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	private void showNewVersion(String newVersion, boolean dialog) {
@@ -206,19 +208,19 @@ public class RobocodeFrame extends JFrame {
 		if (!dialog) return;
 
 		if (JOptionPane.showConfirmDialog(this,
-				"Version " + newVersion + " of Robocode is now available.  Would you like to download it?",
-				"Version " + newVersion + " available", JOptionPane.YES_NO_OPTION)
-				== JOptionPane.YES_OPTION) {
+			"Version " + newVersion + " of Robocode is now available.  Would you like to download it?",
+			"Version " + newVersion + " available", JOptionPane.YES_NO_OPTION)
+			== JOptionPane.YES_OPTION) {
 			try {
 				BrowserManager.openURL(INSTALL_URL);
 			} catch (IOException e) {
 				JOptionPane.showMessageDialog(this, e.getMessage(), "Unable to open browser!",
-						JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.INFORMATION_MESSAGE);
 			}
 		} else if (Version.isFinal(newVersion)) {
 			JOptionPane.showMessageDialog(this,
-					"It is highly recommended that you always download the latest version.  You may get it at " + INSTALL_URL,
-					"Update when you can!", JOptionPane.INFORMATION_MESSAGE);
+				"It is highly recommended that you always download the latest version.  You may get it at " + INSTALL_URL,
+				"Update when you can!", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 
@@ -259,6 +261,29 @@ public class RobocodeFrame extends JFrame {
 			battleViewPanel.setPreferredSize(new Dimension(800, 600));
 			battleViewPanel.setLayout(null);
 			battleViewPanel.addComponentListener(eventHandler);
+
+			final Canvas canvas = battleView.getCanvas();
+
+			battleViewPanel.add(canvas);
+
+			canvas.addMouseListener(interactiveHandler);
+			canvas.addMouseMotionListener(interactiveHandler);
+			canvas.addMouseWheelListener(interactiveHandler);
+			canvas.setFocusable(true);
+
+			canvas.setBounds(0, 0, 100, 100);
+
+			Timer timer = new Timer(1000, new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					canvasInitialized = true;
+					canvas.setBounds(battleViewPanel.getBounds());
+				}
+			});
+			timer.setRepeats(false);
+			timer.start();
+
+			// canvas.setBounds(999, 999, 100, 100);
 		}
 		return battleViewPanel;
 	}
@@ -560,11 +585,6 @@ public class RobocodeFrame extends JFrame {
 
 		addWindowListener(eventHandler);
 
-		battleView.getCanvas().addMouseListener(interactiveHandler);
-		battleView.getCanvas().addMouseMotionListener(interactiveHandler);
-		battleView.getCanvas().addMouseWheelListener(interactiveHandler);
-		battleView.getCanvas().setFocusable(true);
-
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(interactiveHandler);
 
 		if (windowManager.isSlave()) {
@@ -627,29 +647,29 @@ public class RobocodeFrame extends JFrame {
 			return 5 * value - 160;
 		}
 		switch (value) {
-		case 53:
-			return 110;
+			case 53:
+				return 110;
 
-		case 54:
-			return 130;
+			case 54:
+				return 130;
 
-		case 55:
-			return 150;
+			case 55:
+				return 150;
 
-		case 56:
-			return 200;
+			case 56:
+				return 200;
 
-		case 57:
-			return 300;
+			case 57:
+				return 300;
 
-		case 58:
-			return 500;
+			case 58:
+				return 500;
 
-		case 59:
-			return 750;
+			case 59:
+				return 750;
 
-		case 60:
-			return 1000;
+			case 60:
+				return 1000;
 		}
 		return MAX_TPS;
 	}
@@ -713,9 +733,7 @@ public class RobocodeFrame extends JFrame {
 	}
 
 	private class EventHandler implements ComponentListener, ActionListener, ContainerListener, WindowListener,
-			ChangeListener {
-
-		private boolean added = false;
+		ChangeListener {
 
 		public void actionPerformed(ActionEvent e) {
 			final Object source = e.getSource();
@@ -735,26 +753,28 @@ public class RobocodeFrame extends JFrame {
 
 		public void componentResized(ComponentEvent e) {
 			if (e.getSource() == getBattleViewPanel()) {
-				battleViewPanelResized();
+				if (canvasInitialized) {
+					battleViewPanelResized();
+				}
 			}
 		}
 
-		public void componentShown(ComponentEvent e) {}
-
-		public void componentHidden(ComponentEvent e) {}
-
-		public void componentRemoved(ContainerEvent e) {}
-
-		public void componentAdded(ContainerEvent e) {}
-
-		public void componentMoved(ComponentEvent e) {}
-
-		public void windowActivated(WindowEvent e) {
-			if (!added) {
-				added = true;
-				battleViewPanel.add(battleView.getCanvas());
-			}
+		public void componentShown(ComponentEvent e) {
 		}
+
+		public void componentHidden(ComponentEvent e) {
+		}
+
+		public void componentRemoved(ContainerEvent e) {
+		}
+
+		public void componentAdded(ContainerEvent e) {
+		}
+
+		public void componentMoved(ComponentEvent e) {
+		}
+
+		public void windowActivated(WindowEvent e) {}
 
 		public void windowClosed(WindowEvent e) {
 			if (exitOnClose) {
@@ -778,7 +798,8 @@ public class RobocodeFrame extends JFrame {
 			properties.saveProperties();
 		}
 
-		public void windowDeactivated(WindowEvent e) {}
+		public void windowDeactivated(WindowEvent e) {
+		}
 
 		public void windowDeiconified(WindowEvent e) {
 			setIconified(false);
@@ -1008,7 +1029,7 @@ public class RobocodeFrame extends JFrame {
 			}
 
 			MemoryUsage memUsage = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
-			
+
 			long usedMem = memUsage.getUsed() / (1024 * 1024);
 
 			title.append(", Used mem: ").append(usedMem);
