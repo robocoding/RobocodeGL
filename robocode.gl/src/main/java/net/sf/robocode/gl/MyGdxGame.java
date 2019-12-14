@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
@@ -22,11 +23,14 @@ import robocode.control.snapshot.ITurnSnapshot;
 
 import java.util.concurrent.BlockingQueue;
 
+import static java.lang.Math.max;
 import static java.lang.Math.sqrt;
 
 public final class MyGdxGame extends ApplicationAdapter {
 	private final BlockingQueue<ITurnSnapshot> snapshotQue;
 	private OrthographicCamera camera;
+
+	private ShapeRenderer shapeRenderer;
 
 	private Texture bodyLarge;
 	private TextureAtlas robotAtlas;
@@ -51,6 +55,8 @@ public final class MyGdxGame extends ApplicationAdapter {
 	@Override
 	public void create() {
 		robotShader = createRobotShader();
+
+		shapeRenderer = new ShapeRenderer();
 
 		explodeDebris = hiTexture("explode_debris.png");
 
@@ -84,6 +90,7 @@ public final class MyGdxGame extends ApplicationAdapter {
 	@Override
 	public void render() {
 		camera.update();
+		shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
 
 		try {
 			s = snapshotQue.take();
@@ -101,6 +108,8 @@ public final class MyGdxGame extends ApplicationAdapter {
 	@Override
 	public void dispose() {
 		robotShader.dispose();
+
+		shapeRenderer.dispose();
 
 		robotAtlas.dispose();
 		bodyLarge.dispose();
@@ -218,6 +227,26 @@ public final class MyGdxGame extends ApplicationAdapter {
 					}
 				}
 			}
+
+			batch.end();
+
+			shapeRenderer.setColor(Color.WHITE);
+			shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+			for (IBulletSnapshot bullet : s.getBullets()) {
+				if (bullet.getState().isActive()) {
+					float bulletX = (float) bullet.getPaintX();
+					float bulletY = (float) bullet.getPaintY();
+
+					float radius = (float) max(2 * sqrt(2.5 * bullet.getPower()), 2) * .5f;
+
+					shapeRenderer.circle(bulletX, bulletY, radius);
+				}
+			}
+
+			shapeRenderer.end();
+
+			batch.begin();
 		}
 	}
 
