@@ -48,6 +48,8 @@ public final class MyGdxGame extends ApplicationAdapter {
 	private ITurnSnapshot s;
 	private ShaderProgram robotShader;
 
+	private long count = 0;
+
 	public MyGdxGame(BlockingQueue<ITurnSnapshot> snapshotQue) {
 		this.snapshotQue = snapshotQue;
 	}
@@ -92,12 +94,16 @@ public final class MyGdxGame extends ApplicationAdapter {
 		camera.update();
 		shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
 
-		try {
-			s = snapshotQue.take();
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			return;
+		if (s == null || (count & 1) == 0) {
+			try {
+				s = snapshotQue.take();
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				return;
+			}
 		}
+
+		++count;
 
 		// Gdx.gl.glClearColor(.5f, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
