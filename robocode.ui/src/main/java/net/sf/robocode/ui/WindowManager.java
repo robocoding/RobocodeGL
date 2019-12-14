@@ -22,7 +22,17 @@ import net.sf.robocode.ui.editor.IRobocodeEditor;
 import net.sf.robocode.ui.packager.RobotPackager;
 import net.sf.robocode.version.IVersionManager;
 import robocode.control.events.BattleCompletedEvent;
+import robocode.control.events.BattleErrorEvent;
+import robocode.control.events.BattleFinishedEvent;
+import robocode.control.events.BattleMessageEvent;
+import robocode.control.events.BattlePausedEvent;
+import robocode.control.events.BattleResumedEvent;
+import robocode.control.events.BattleStartedEvent;
 import robocode.control.events.IBattleListener;
+import robocode.control.events.RoundEndedEvent;
+import robocode.control.events.RoundStartedEvent;
+import robocode.control.events.TurnEndedEvent;
+import robocode.control.events.TurnStartedEvent;
 import robocode.control.snapshot.ITurnSnapshot;
 
 import javax.swing.*;
@@ -37,6 +47,7 @@ import java.util.*;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.BlockingQueue;
 
 
 /**
@@ -181,6 +192,59 @@ public class WindowManager implements IWindowManagerExt {
 					}
 				});
 			}
+
+			final BlockingQueue<ITurnSnapshot> snapshotQue = frame.getSnapshotQue();
+
+			battleManager.addListener(new IBattleListener() {
+				@Override
+				public void onBattleStarted(BattleStartedEvent event) {
+				}
+
+				@Override
+				public void onBattleFinished(BattleFinishedEvent event) {
+				}
+
+				@Override
+				public void onBattleCompleted(BattleCompletedEvent event) {
+				}
+
+				@Override
+				public void onBattlePaused(BattlePausedEvent event) {
+				}
+
+				@Override
+				public void onBattleResumed(BattleResumedEvent event) {
+				}
+
+				@Override
+				public void onRoundStarted(RoundStartedEvent event) {
+				}
+
+				@Override
+				public void onRoundEnded(RoundEndedEvent event) {
+				}
+
+				@Override
+				public void onTurnStarted(TurnStartedEvent event) {
+				}
+
+				@Override
+				public void onTurnEnded(TurnEndedEvent event) {
+					try {
+						snapshotQue.put(event.getTurnSnapshot());
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				}
+
+				@Override
+				public void onBattleMessage(BattleMessageEvent event) {
+				}
+
+				@Override
+				public void onBattleError(BattleErrorEvent event) {
+				}
+			});
 
 			// frame.setVisible(false);
 

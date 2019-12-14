@@ -35,6 +35,7 @@ import java.lang.management.MemoryUsage;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 
 /**
@@ -97,6 +98,7 @@ public class RobocodeFrame extends JFrame {
 
 	final List<RobotButton> robotButtons = new ArrayList<RobotButton>();
 	private FileDropHandler fileDropHandler;
+	private final BlockingQueue<ITurnSnapshot> snapshotQue;
 
 	public RobocodeFrame(ISettingsManager properties,
 			IWindowManager windowManager,
@@ -116,6 +118,7 @@ public class RobocodeFrame extends JFrame {
 		this.dialogManager = dialogManager;
 		this.recordManager = recordManager;
 		this.battleView = battleView;
+		this.snapshotQue = battleView.getSnapshotQue();
 		this.menuBar = menuBar;
 		menuBar.setup(this);
 		initialize();
@@ -710,6 +713,10 @@ public class RobocodeFrame extends JFrame {
 
 	public FileDropHandler getFileDropHandler() {
 		return fileDropHandler;
+	}
+
+	public BlockingQueue<ITurnSnapshot> getSnapshotQue() {
+		return snapshotQue;
 	}
 
 	private class EventHandler implements ComponentListener, ActionListener, ContainerListener, WindowListener,

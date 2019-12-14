@@ -38,6 +38,7 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import static java.lang.Math.*;
 import java.util.Random;
+import java.util.concurrent.BlockingQueue;
 
 
 /**
@@ -56,6 +57,7 @@ public class BattleView extends Canvas {
 
 	private final static int ROBOT_TEXT_Y_OFFSET = 24;
 	private final LwjglApplication app;
+	private final BlockingQueue<ITurnSnapshot> snapshotQue;
 
 	private BattleRules battleRules;
 	
@@ -129,6 +131,11 @@ public class BattleView extends Canvas {
 		});
 
 		app = glCore.show();
+		snapshotQue = glCore.getSnapshotQue();
+	}
+
+	public BlockingQueue<ITurnSnapshot> getSnapshotQue() {
+		return snapshotQue;
 	}
 
 	public LwjglApplication getApp() {
@@ -697,10 +704,11 @@ public class BattleView extends Canvas {
 		}
 
 		public void onTurnEnded(final TurnEndedEvent event) {
-			if (event.getTurnSnapshot() == null) {
+			ITurnSnapshot snapshot = event.getTurnSnapshot();
+			if (snapshot == null) {
 				repaint();
 			} else {
-				update(event.getTurnSnapshot());
+				update(snapshot);
 			}
 		}
 	}

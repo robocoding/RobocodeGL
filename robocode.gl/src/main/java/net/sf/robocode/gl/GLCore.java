@@ -3,10 +3,15 @@ package net.sf.robocode.gl;
 import com.badlogic.gdx.backends.lwjgl.LwjglAWTCanvas;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import robocode.control.snapshot.ITurnSnapshot;
 
 import java.awt.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public final class GLCore implements IGLCore {
+	private final BlockingQueue<ITurnSnapshot> snapshotQue = new LinkedBlockingQueue<ITurnSnapshot>(1);
+
 	private LwjglAWTCanvas canvas;
 
 	private static final LwjglApplicationConfiguration config;
@@ -33,7 +38,7 @@ public final class GLCore implements IGLCore {
 	@Override
 	public Canvas getCanvas() {
 		if (canvas == null) {
-			canvas = new LwjglAWTCanvas(new MyGdxGame(), config);
+			canvas = new LwjglAWTCanvas(new MyGdxGame(snapshotQue), config);
 		}
 		return canvas.getCanvas();
 	}
@@ -52,7 +57,12 @@ public final class GLCore implements IGLCore {
 	}
 
 	@Override
+	public BlockingQueue<ITurnSnapshot> getSnapshotQue() {
+		return snapshotQue;
+	}
+
+	@Override
 	public LwjglApplication show() {
-		return new LwjglApplication(new MyGdxGame(), config);
+		return new LwjglApplication(new MyGdxGame(snapshotQue), config);
 	}
 }
