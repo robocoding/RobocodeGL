@@ -1,5 +1,7 @@
 package net.sf.robocode.gl;
 
+import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
+
 import java.awt.*;
 
 public interface IGLCore {
@@ -7,5 +9,5 @@ public interface IGLCore {
 
 	void exit();
 
-	void show();
+	LwjglApplication show();
 }

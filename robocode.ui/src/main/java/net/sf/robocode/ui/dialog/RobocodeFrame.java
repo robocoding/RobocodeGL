@@ -751,7 +751,8 @@ public class RobocodeFrame extends JFrame {
 
 		public void windowClosed(WindowEvent e) {
 			if (exitOnClose) {
-				System.exit(0);
+				battleView.getApp().exit();
+				// System.exit(0);
 			}
 		}
 

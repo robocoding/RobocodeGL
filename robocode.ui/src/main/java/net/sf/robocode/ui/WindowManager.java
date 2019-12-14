@@ -182,6 +182,8 @@ public class WindowManager implements IWindowManagerExt {
 				});
 			}
 
+			// frame.setVisible(false);
+
 		} else {
 			frame.setVisible(false);
 		}

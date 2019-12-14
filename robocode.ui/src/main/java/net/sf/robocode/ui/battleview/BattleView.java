@@ -8,7 +8,9 @@
 package net.sf.robocode.ui.battleview;
 
 
+import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import net.sf.robocode.battle.snapshot.RobotSnapshot;
+import net.sf.robocode.gl.IGLCore;
 import net.sf.robocode.robotpaint.Graphics2DSerialized;
 import net.sf.robocode.robotpaint.IGraphicsProxy;
 import net.sf.robocode.settings.ISettingsManager;
@@ -53,6 +55,7 @@ public class BattleView extends Canvas {
 	private final static Area BULLET_AREA = new Area(new Ellipse2D.Double(-0.5, -0.5, 1, 1));
 
 	private final static int ROBOT_TEXT_Y_OFFSET = 24;
+	private final LwjglApplication app;
 
 	private BattleRules battleRules;
 	
@@ -99,7 +102,7 @@ public class BattleView extends Canvas {
 	private final GraphicsState graphicsState = new GraphicsState();
 	private IGraphicsProxy[] robotGraphics;
 
-	public BattleView(ISettingsManager properties, IWindowManager windowManager, IImageManager imageManager) {
+	public BattleView(ISettingsManager properties, IWindowManager windowManager, IImageManager imageManager, IGLCore glCore) {
 		this.properties = properties;
 		this.windowManager = (IWindowManagerExt) windowManager;
 		this.imageManager = imageManager; 
@@ -124,6 +127,12 @@ public class BattleView extends Canvas {
 				reinitialize();
 			}
 		});
+
+		app = glCore.show();
+	}
+
+	public LwjglApplication getApp() {
+		return app;
 	}
 
 	@Override

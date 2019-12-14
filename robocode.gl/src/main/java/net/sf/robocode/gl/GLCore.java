@@ -23,10 +23,11 @@ public final class GLCore implements IGLCore {
 		config.vSyncEnabled = true;
 		config.title = "Robocode OpenGL";
 		config.samples = 4;
+		LwjglApplicationConfiguration.disableAudio = true;
 	}
 
 	public GLCore() {
-		getCanvas();
+		// getCanvas();
 	}
 
 	@Override
@@ -51,7 +52,7 @@ public final class GLCore implements IGLCore {
 	}
 
 	@Override
-	public void show() {
-		new LwjglApplication(new MyGdxGame(), config);
+	public LwjglApplication show() {
+		return new LwjglApplication(new MyGdxGame(), config);
 	}
 }
