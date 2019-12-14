@@ -172,6 +172,13 @@ public class HiddenAccess {
 				if (name.contains("bcel")) { // BCEL used by Codesize
 					urls.add(url);
 				}
+				if (name.contains("lwjgl")) urls.add(url);
+				if (name.contains("hppc")) urls.add(url);
+				if (name.contains("gdx")) urls.add(url);
+				if (name.contains("jinput")) urls.add(url);
+				if (name.contains("jlayer")) urls.add(url);
+				if (name.contains("jorbis")) urls.add(url);
+				if (name.contains("jutils")) urls.add(url);
 				if (name.contains("kotlin-stdlib")) { // Kotlin standard library
 					urls.add(url);
 				}
