@@ -42,16 +42,18 @@ public final class MyGdxGame extends ApplicationAdapter {
 	private Texture explodeDebris;
 
 	private Stage stage;
-	private final float worldWidth = 800;
-	private final float worldHeight = 600;
+	private final float worldWidth;
+	private final float worldHeight;
 
 	private ITurnSnapshot s;
 	private ShaderProgram robotShader;
 
 	private long count = 0;
 
-	public MyGdxGame(BlockingQueue<ITurnSnapshot> snapshotQue) {
+	public MyGdxGame(BlockingQueue<ITurnSnapshot> snapshotQue, float worldWidth, float worldHeight) {
 		this.snapshotQue = snapshotQue;
+		this.worldWidth = worldWidth;
+		this.worldHeight = worldHeight;
 	}
 
 	@Override

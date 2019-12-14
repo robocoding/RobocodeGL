@@ -14,13 +14,14 @@ public final class GLCore implements IGLCore {
 
 	private LwjglAWTCanvas canvas;
 
+	private static final float width = 1000;
+	private static final float height = 1000;
+
+
 	private static final LwjglApplicationConfiguration config;
 
 	static {
 		config = new LwjglApplicationConfiguration();
-
-		float width = 800;
-		float height = 600;
 
 		config.width = (int) width;
 		config.height = (int) height;
@@ -38,7 +39,7 @@ public final class GLCore implements IGLCore {
 	@Override
 	public Canvas getCanvas() {
 		if (canvas == null) {
-			canvas = new LwjglAWTCanvas(new MyGdxGame(snapshotQue), config);
+			canvas = new LwjglAWTCanvas(new MyGdxGame(snapshotQue, width, height), config);
 		}
 		return canvas.getCanvas();
 	}
@@ -63,6 +64,6 @@ public final class GLCore implements IGLCore {
 
 	@Override
 	public LwjglApplication show() {
-		return new LwjglApplication(new MyGdxGame(snapshotQue), config);
+		return new LwjglApplication(new MyGdxGame(snapshotQue, width, height), config);
 	}
 }
