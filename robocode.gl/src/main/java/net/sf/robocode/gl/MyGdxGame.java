@@ -16,10 +16,13 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import robocode.control.snapshot.IBulletSnapshot;
 import robocode.control.snapshot.IRobotSnapshot;
 import robocode.control.snapshot.ITurnSnapshot;
 
 import java.util.concurrent.BlockingQueue;
+
+import static java.lang.Math.sqrt;
 
 public final class MyGdxGame extends ApplicationAdapter {
 	private final BlockingQueue<ITurnSnapshot> snapshotQue;
@@ -29,6 +32,10 @@ public final class MyGdxGame extends ApplicationAdapter {
 	private TextureAtlas robotAtlas;
 	private TextureRegion gunLarge;
 	private TextureRegion radarLarge;
+	private TextureAtlas explosions;
+	private TextureRegion[] explosion1;
+	private TextureRegion[] explosion2;
+	private Texture explodeDebris;
 
 	private Stage stage;
 	private final float worldWidth = 800;
@@ -45,10 +52,22 @@ public final class MyGdxGame extends ApplicationAdapter {
 	public void create() {
 		robotShader = createRobotShader();
 
+		explodeDebris = hiTexture("explode_debris.png");
+
 		robotAtlas = new TextureAtlas(internal("robot.atlas"), internal(""));
 		bodyLarge = hiTexture("body-large.png");
 		gunLarge = robotAtlas.findRegion("turret9");
 		radarLarge = robotAtlas.findRegion("radar11");
+
+		explosions = new TextureAtlas(internal("explosions.atlas"), internal(""));
+		explosion1 = new TextureRegion[17];
+		for (int i = 1; i <= 17; ++i) {
+			explosion1[i - 1] = explosions.findRegion("explosion1-" + i);
+		}
+		explosion2 = new TextureRegion[71];
+		for (int i = 1; i <= 71; ++i) {
+			explosion2[i - 1] = explosions.findRegion("explosion2-" + i);
+		}
 
 		camera = new OrthographicCamera();
 		Viewport viewport = new ExtendViewport(worldWidth, worldHeight, camera);
@@ -57,6 +76,7 @@ public final class MyGdxGame extends ApplicationAdapter {
 		stage = new Stage(viewport);
 
 		stage.addActor(new RobotsActor());
+		stage.addActor(new BulletsActor());
 
 		resize(viewport.getScreenWidth(), viewport.getScreenHeight());
 	}
@@ -81,8 +101,12 @@ public final class MyGdxGame extends ApplicationAdapter {
 	@Override
 	public void dispose() {
 		robotShader.dispose();
+
 		robotAtlas.dispose();
 		bodyLarge.dispose();
+		explosions.dispose();
+		explodeDebris.dispose();
+
 		stage.dispose();
 	}
 
@@ -104,23 +128,40 @@ public final class MyGdxGame extends ApplicationAdapter {
 		public void draw(Batch batch, float parentAlpha) {
 			if (s == null) return;
 
+			for (IRobotSnapshot robot : s.getRobots()) {
+				if (robot.getState().isDead()) {
+					float x = (float) robot.getX();
+					float y = (float) robot.getY();
+					float w = explodeDebris.getWidth();
+					float h = explodeDebris.getHeight();
+
+					batch.draw(explodeDebris, x - w * .5f, y - h * .5f);
+				}
+			}
+
 			batch.setShader(robotShader);
 
 			for (IRobotSnapshot robot : s.getRobots()) {
-				float robotX = (float) robot.getX();
-				float robotY = (float) robot.getY();
+				if (robot.getState().isAlive()) {
+					float robotX = (float) robot.getX();
+					float robotY = (float) robot.getY();
 
-				float bodyHeading = (float) Math.toDegrees(robot.getBodyHeading());
-				float gunHeading = (float) Math.toDegrees(robot.getGunHeading());
-				float radarHeading = (float) Math.toDegrees(robot.getRadarHeading());
+					float bodyHeading = (float) Math.toDegrees(robot.getBodyHeading());
+					float gunHeading = (float) Math.toDegrees(robot.getGunHeading());
+					float radarHeading = (float) Math.toDegrees(robot.getRadarHeading());
 
-				batch.setPackedColor(getPackedColorBlend(robot.getBodyColor()));
-				draw(batch, bodyLarge, bodyLargeDx, bodyLargeDy, -bodyHeading, robotX, robotY, .18f);
-				batch.setPackedColor(getPackedColorBlend(robot.getGunColor()));
-				draw(batch, gunLarge, gunLargeDx, gunLargeDy, -(gunHeading), robotX, robotY, .18f);
-				batch.setPackedColor(getPackedColorBlend(robot.getRadarColor()));
-				draw(batch, radarLarge, radarLargeDx, radarLargeDy, -(radarHeading), robotX, robotY, .18f);
-				batch.setPackedColor(Color.WHITE_FLOAT_BITS);
+					batch.setPackedColor(getPackedColorBlend(robot.getBodyColor()));
+					draw(batch, bodyLarge, bodyLargeDx, bodyLargeDy, -bodyHeading, robotX, robotY, .18f);
+					batch.setPackedColor(getPackedColorBlend(robot.getGunColor()));
+					draw(batch, gunLarge, gunLargeDx, gunLargeDy, -(gunHeading), robotX, robotY, .18f);
+
+					if (!robot.isDroid()) {
+						batch.setPackedColor(getPackedColorBlend(robot.getRadarColor()));
+						draw(batch, radarLarge, radarLargeDx, radarLargeDy, -(radarHeading), robotX, robotY, .18f);
+					}
+
+					batch.setPackedColor(Color.WHITE_FLOAT_BITS);
+				}
 			}
 
 			batch.setShader(null);
@@ -144,6 +185,39 @@ public final class MyGdxGame extends ApplicationAdapter {
 				texture.getRegionWidth(), texture.getRegionHeight(),
 				scale, scale,
 				this.getRotation() + rotate);
+		}
+	}
+
+	private final class BulletsActor extends Actor {
+		@Override
+		public void draw(Batch batch, float parentAlpha) {
+			if (s == null) return;
+
+			for (IBulletSnapshot bullet : s.getBullets()) {
+				if (!bullet.getState().isActive()) {
+					int explosionIndex = bullet.getExplosionImageIndex();
+					int frame = bullet.getFrame();
+
+					float x = (float) bullet.getPaintX();
+					float y = (float) bullet.getPaintY();
+
+					float explosionScale = 1f;
+					TextureRegion f = null;
+
+					if (explosionIndex == 0 && 0 <= frame && frame < 17) {
+						f = explosion1[frame];
+						explosionScale = (float) sqrt(1000 * bullet.getPower()) / 128f;
+					} else if (explosionIndex == 1 && 0 <= frame && frame < 71) {
+						f = explosion2[frame];
+					}
+
+					if (f != null) {
+						int w = f.getRegionWidth();
+						int h = f.getRegionHeight();
+						batch.draw(f, x - w * .5f, y - h * .5f, w * .5f, h * .5f, w, h, explosionScale, explosionScale, 0, false);
+					}
+				}
+			}
 		}
 	}
 
