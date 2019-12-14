@@ -9,6 +9,7 @@ package net.sf.robocode.ui.battleview;
 
 
 import net.sf.robocode.battle.snapshot.RobotSnapshot;
+import net.sf.robocode.gl.IGLCore;
 import net.sf.robocode.robotpaint.Graphics2DSerialized;
 import net.sf.robocode.robotpaint.IGraphicsProxy;
 import net.sf.robocode.settings.ISettingsManager;
@@ -44,7 +45,7 @@ import java.util.Random;
  * @author Pavel Savara (contributor)
  */
 @SuppressWarnings("serial")
-public class BattleView extends Canvas {
+public class BattleView {
 
 	private final static String ROBOCODE_SLOGAN = "Build the best, destroy the rest!";
 
@@ -53,6 +54,8 @@ public class BattleView extends Canvas {
 	private final static Area BULLET_AREA = new Area(new Ellipse2D.Double(-0.5, -0.5, 1, 1));
 
 	private final static int ROBOT_TEXT_Y_OFFSET = 24;
+	private final IGLCore glCore;
+	private final Canvas canvas;
 
 	private BattleRules battleRules;
 	
@@ -99,7 +102,15 @@ public class BattleView extends Canvas {
 	private final GraphicsState graphicsState = new GraphicsState();
 	private IGraphicsProxy[] robotGraphics;
 
-	public BattleView(ISettingsManager properties, IWindowManager windowManager, IImageManager imageManager) {
+	public int getWidth() {
+		return canvas.getWidth();
+	}
+
+	public int getHeight() {
+		return canvas.getHeight();
+	}
+
+	public BattleView(ISettingsManager properties, IWindowManager windowManager, IImageManager imageManager, IGLCore glCore) {
 		this.properties = properties;
 		this.windowManager = (IWindowManagerExt) windowManager;
 		this.imageManager = imageManager; 
@@ -118,7 +129,10 @@ public class BattleView extends Canvas {
 			}
 		});
 
-		addComponentListener(new ComponentAdapter() {
+		this.glCore = glCore;
+		canvas = glCore.getCanvas();
+
+		canvas.addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent e) {
 				initialized = false;
 				reinitialize();
@@ -126,23 +140,31 @@ public class BattleView extends Canvas {
 		});
 	}
 
-	@Override
-	public void update(Graphics g) {
-		paint(g);
+	public Canvas getCanvas() {
+		return canvas;
 	}
 
-	@Override
-	public void paint(Graphics g) {
-		final ITurnSnapshot lastSnapshot = windowManager.getLastSnapshot();
-		if (lastSnapshot != null) {
-			update(lastSnapshot);
-		} else {
-			paintRobocodeLogo((Graphics2D) g);
-		}
+	public IGLCore getGlCore() {
+		return glCore;
 	}
+	//
+	// @Override
+	// public void update(Graphics g) {
+	// 	paint(g);
+	// }
+	//
+	// @Override
+	// public void paint(Graphics g) {
+	// 	final ITurnSnapshot lastSnapshot = windowManager.getLastSnapshot();
+	// 	if (lastSnapshot != null) {
+	// 		update(lastSnapshot);
+	// 	} else {
+	// 		paintRobocodeLogo((Graphics2D) g);
+	// 	}
+	// }
 
 	public BufferedImage getScreenshot() {
-		BufferedImage screenshot = getGraphicsConfiguration().createCompatibleImage(getWidth(), getHeight());
+		BufferedImage screenshot = canvas.getGraphicsConfiguration().createCompatibleImage(getWidth(), getHeight());
 
 		if (windowManager.getLastSnapshot() == null) {
 			paintRobocodeLogo((Graphics2D) screenshot.getGraphics());		
@@ -157,7 +179,7 @@ public class BattleView extends Canvas {
 			initialize();
 		}
 
-		if (windowManager.isIconified() || !isDisplayable() || (getWidth() <= 0) || (getHeight() <= 0)) {
+		if (windowManager.isIconified() || !canvas.isDisplayable() || (getWidth() <= 0) || (getHeight() <= 0)) {
 			return;
 		}
 
@@ -205,32 +227,32 @@ public class BattleView extends Canvas {
 	private void initialize() {
 		loadDisplayOptions();
 
-		if (bufferStrategy == null) {
-			createBufferStrategy(numBuffers);
-			bufferStrategy = getBufferStrategy();
-		}
-
-		// If we are scaled...
-		if (getWidth() < battleField.getWidth() || getHeight() < battleField.getHeight()) {
-			// Use the smaller scale.
-			// Actually we don't need this, since
-			// the RobocodeFrame keeps our aspect ratio intact.
-
-			scale = min((double) getWidth() / battleField.getWidth(), (double) getHeight() / battleField.getHeight());
-		} else {
-			scale = 1;
-		}
-
-		// Scale font
-		smallFont = new Font("Dialog", Font.PLAIN, (int) (10 / scale));
-		smallFontMetrics = bufferStrategy.getDrawGraphics().getFontMetrics();
-
-		// Initialize ground image
-		if (drawGround) {
-			createGroundImage();
-		} else {
-			groundImage = null;
-		}
+		// if (bufferStrategy == null) {
+		// 	createBufferStrategy(numBuffers);
+		// 	bufferStrategy = getBufferStrategy();
+		// }
+		//
+		// // If we are scaled...
+		// if (getWidth() < battleField.getWidth() || getHeight() < battleField.getHeight()) {
+		// 	// Use the smaller scale.
+		// 	// Actually we don't need this, since
+		// 	// the RobocodeFrame keeps our aspect ratio intact.
+		//
+		// 	scale = min((double) getWidth() / battleField.getWidth(), (double) getHeight() / battleField.getHeight());
+		// } else {
+		// 	scale = 1;
+		// }
+		//
+		// // Scale font
+		// smallFont = new Font("Dialog", Font.PLAIN, (int) (10 / scale));
+		// smallFontMetrics = bufferStrategy.getDrawGraphics().getFontMetrics();
+		//
+		// // Initialize ground image
+		// if (drawGround) {
+		// 	createGroundImage();
+		// } else {
+		// 	groundImage = null;
+		// }
 
 		initialized = true;
 	}
@@ -644,7 +666,7 @@ public class BattleView extends Canvas {
 	}
 
 	private void paintRobocodeLogo(Graphics2D g) {
-		setBackground(Color.BLACK);
+		canvas.setBackground(Color.BLACK);
 		g.clearRect(0, 0, getWidth(), getHeight());
 
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -674,7 +696,7 @@ public class BattleView extends Canvas {
 			battleField = new BattleField(battleRules.getBattlefieldWidth(), battleRules.getBattlefieldHeight());
 
 			initialized = false;
-			setVisible(true);
+			canvas.setVisible(true);
 
 			super.onBattleStarted(event);
 
@@ -689,7 +711,7 @@ public class BattleView extends Canvas {
 
 		public void onTurnEnded(final TurnEndedEvent event) {
 			if (event.getTurnSnapshot() == null) {
-				repaint();
+				canvas.repaint();
 			} else {
 				update(event.getTurnSnapshot());
 			}

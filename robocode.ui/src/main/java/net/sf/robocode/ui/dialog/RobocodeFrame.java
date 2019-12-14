@@ -228,7 +228,7 @@ public class RobocodeFrame extends JFrame {
 	 * use a layout manager if someone wants to write one...
 	 */
 	private void battleViewPanelResized() {
-		battleView.setBounds(getBattleViewPanel().getBounds());
+		battleView.getCanvas().setBounds(getBattleViewPanel().getBounds());
 	}
 
 	/**
@@ -258,7 +258,6 @@ public class RobocodeFrame extends JFrame {
 			battleViewPanel = new JPanel();
 			battleViewPanel.setPreferredSize(new Dimension(800, 600));
 			battleViewPanel.setLayout(null);
-			battleViewPanel.add(battleView);
 			battleViewPanel.addComponentListener(eventHandler);
 		}
 		return battleViewPanel;
@@ -561,10 +560,11 @@ public class RobocodeFrame extends JFrame {
 
 		addWindowListener(eventHandler);
 
-		battleView.addMouseListener(interactiveHandler);
-		battleView.addMouseMotionListener(interactiveHandler);
-		battleView.addMouseWheelListener(interactiveHandler);
-		battleView.setFocusable(true);
+		battleView.getCanvas().addMouseListener(interactiveHandler);
+		battleView.getCanvas().addMouseMotionListener(interactiveHandler);
+		battleView.getCanvas().addMouseWheelListener(interactiveHandler);
+		battleView.getCanvas().setFocusable(true);
+
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(interactiveHandler);
 
 		if (windowManager.isSlave()) {
@@ -715,6 +715,8 @@ public class RobocodeFrame extends JFrame {
 	private class EventHandler implements ComponentListener, ActionListener, ContainerListener, WindowListener,
 			ChangeListener {
 
+		private boolean added = false;
+
 		public void actionPerformed(ActionEvent e) {
 			final Object source = e.getSource();
 
@@ -747,11 +749,17 @@ public class RobocodeFrame extends JFrame {
 
 		public void componentMoved(ComponentEvent e) {}
 
-		public void windowActivated(WindowEvent e) {}
+		public void windowActivated(WindowEvent e) {
+			if (!added) {
+				added = true;
+				battleViewPanel.add(battleView.getCanvas());
+			}
+		}
 
 		public void windowClosed(WindowEvent e) {
 			if (exitOnClose) {
-				System.exit(0);
+				// System.exit(0);
+				battleView.getGlCore().exit();
 			}
 		}
 
