@@ -204,6 +204,11 @@ public class WindowManager implements IWindowManagerExt {
 
 				@Override
 				public void onBattleFinished(BattleFinishedEvent event) {
+					try {
+						glCore.getSnapshotQue().put(new TurnSnap(null));
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
 				}
 
 				@Override
@@ -232,8 +237,8 @@ public class WindowManager implements IWindowManagerExt {
 
 				@Override
 				public void onTurnEnded(TurnEndedEvent event) {
+					ITurnSnapshot s = event.getTurnSnapshot();
 					try {
-						ITurnSnapshot s = event.getTurnSnapshot();
 						glCore.getSnapshotQue().put(new TurnSnap(s));
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();

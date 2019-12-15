@@ -97,12 +97,9 @@ public final class MyGdxGame extends ApplicationAdapter {
 		shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
 
 		if (s == null || (count & 1) == 0) {
-			try {
-				TurnSnap snap = snapshotQue.take();
+			TurnSnap snap = snapshotQue.poll();
+			if (snap != null) {
 				s = snap.snapshot;
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				return;
 			}
 		}
 
@@ -111,7 +108,9 @@ public final class MyGdxGame extends ApplicationAdapter {
 		// Gdx.gl.glClearColor(.5f, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		stage.draw();
+		if (s != null) {
+			stage.draw();
+		}
 	}
 
 	@Override
@@ -144,8 +143,6 @@ public final class MyGdxGame extends ApplicationAdapter {
 
 		@Override
 		public void draw(Batch batch, float parentAlpha) {
-			if (s == null) return;
-
 			for (IRobotSnapshot robot : s.getRobots()) {
 				if (robot.getState().isDead()) {
 					float x = (float) robot.getX();
@@ -209,8 +206,6 @@ public final class MyGdxGame extends ApplicationAdapter {
 	private final class BulletsActor extends Actor {
 		@Override
 		public void draw(Batch batch, float parentAlpha) {
-			if (s == null) return;
-
 			for (IBulletSnapshot bullet : s.getBullets()) {
 				if (!bullet.getState().isActive()) {
 					int explosionIndex = bullet.getExplosionImageIndex();
@@ -363,6 +358,4 @@ public final class MyGdxGame extends ApplicationAdapter {
 		if (!shader.isCompiled()) throw new IllegalArgumentException("Error compiling shader: " + shader.getLog());
 		return shader;
 	}
-
-
 }
