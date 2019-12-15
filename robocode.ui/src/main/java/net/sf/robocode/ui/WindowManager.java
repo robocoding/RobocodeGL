@@ -23,6 +23,7 @@ import net.sf.robocode.ui.dialog.*;
 import net.sf.robocode.ui.editor.IRobocodeEditor;
 import net.sf.robocode.ui.packager.RobotPackager;
 import net.sf.robocode.version.IVersionManager;
+import robocode.BattleRules;
 import robocode.control.events.BattleCompletedEvent;
 import robocode.control.events.BattleErrorEvent;
 import robocode.control.events.BattleFinishedEvent;
@@ -200,6 +201,12 @@ public class WindowManager implements IWindowManagerExt {
 			battleManager.addListener(new IBattleListener() {
 				@Override
 				public void onBattleStarted(BattleStartedEvent event) {
+					try {
+						BattleRules rules = event.getBattleRules();
+						glCore.getSnapshotQue().put(new TurnSnap(rules.getBattlefieldWidth(), rules.getBattlefieldHeight()));
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
 				}
 
 				@Override

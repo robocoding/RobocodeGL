@@ -16,7 +16,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import robocode.control.snapshot.IBulletSnapshot;
 import robocode.control.snapshot.IRobotSnapshot;
 import robocode.control.snapshot.ITurnSnapshot;
@@ -42,18 +41,28 @@ public final class MyGdxGame extends ApplicationAdapter {
 	private Texture explodeDebris;
 
 	private Stage stage;
-	private final float worldWidth;
-	private final float worldHeight;
+	private float worldWidth;
+	private float worldHeight;
 
 	private ITurnSnapshot s;
 	private ShaderProgram robotShader;
 
 	private long count = 0;
+	private ExtendViewport viewport;
 
 	public MyGdxGame(BlockingQueue<TurnSnap> snapshotQue, float worldWidth, float worldHeight) {
 		this.snapshotQue = snapshotQue;
 		this.worldWidth = worldWidth;
 		this.worldHeight = worldHeight;
+	}
+
+	public void setWorldSize(float worldWidth, float worldHeight) {
+		this.worldWidth = worldWidth;
+		this.worldHeight = worldHeight;
+
+		viewport.setMinWorldWidth(worldWidth);
+		viewport.setMinWorldHeight(worldHeight);
+		resize();
 	}
 
 	@Override
@@ -80,7 +89,7 @@ public final class MyGdxGame extends ApplicationAdapter {
 		}
 
 		camera = new OrthographicCamera();
-		Viewport viewport = new ExtendViewport(worldWidth, worldHeight, camera);
+		viewport = new ExtendViewport(worldWidth, worldHeight, camera);
 		viewport.apply();
 
 		stage = new Stage(viewport);
@@ -88,22 +97,28 @@ public final class MyGdxGame extends ApplicationAdapter {
 		stage.addActor(new RobotsActor());
 		stage.addActor(new BulletsActor());
 
+		resize();
+	}
+
+	private void resize() {
 		resize(viewport.getScreenWidth(), viewport.getScreenHeight());
 	}
 
 	@Override
 	public void render() {
-		camera.update();
-		shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
-
 		if (s == null || (count & 1) == 0) {
 			TurnSnap snap = snapshotQue.poll();
 			if (snap != null) {
 				s = snap.snapshot;
+				if (snap.battlefieldWidth * snap.battlefieldHeight > 0) {
+					setWorldSize(snap.battlefieldWidth, snap.battlefieldHeight);
+				}
 			}
 		}
-
 		++count;
+
+		camera.update();
+		shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
 
 		// Gdx.gl.glClearColor(.5f, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
