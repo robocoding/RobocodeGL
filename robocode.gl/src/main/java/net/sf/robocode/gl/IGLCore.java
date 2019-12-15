@@ -11,7 +11,7 @@ public interface IGLCore {
 
 	void exit();
 
-	BlockingQueue<ITurnSnapshot> getSnapshotQue();
+	BlockingQueue<TurnSnap> getSnapshotQue();
 
 	LwjglApplication show();
 }

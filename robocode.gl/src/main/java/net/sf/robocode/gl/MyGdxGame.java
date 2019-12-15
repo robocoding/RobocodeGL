@@ -27,7 +27,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.sqrt;
 
 public final class MyGdxGame extends ApplicationAdapter {
-	private final BlockingQueue<ITurnSnapshot> snapshotQue;
+	private final BlockingQueue<TurnSnap> snapshotQue;
 	private OrthographicCamera camera;
 
 	private ShapeRenderer shapeRenderer;
@@ -50,7 +50,7 @@ public final class MyGdxGame extends ApplicationAdapter {
 
 	private long count = 0;
 
-	public MyGdxGame(BlockingQueue<ITurnSnapshot> snapshotQue, float worldWidth, float worldHeight) {
+	public MyGdxGame(BlockingQueue<TurnSnap> snapshotQue, float worldWidth, float worldHeight) {
 		this.snapshotQue = snapshotQue;
 		this.worldWidth = worldWidth;
 		this.worldHeight = worldHeight;
@@ -98,7 +98,8 @@ public final class MyGdxGame extends ApplicationAdapter {
 
 		if (s == null || (count & 1) == 0) {
 			try {
-				s = snapshotQue.take();
+				TurnSnap snap = snapshotQue.take();
+				s = snap.snapshot;
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 				return;

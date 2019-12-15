@@ -3,14 +3,13 @@ package net.sf.robocode.gl;
 import com.badlogic.gdx.backends.lwjgl.LwjglAWTCanvas;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import robocode.control.snapshot.ITurnSnapshot;
 
-import java.awt.*;
+import java.awt.Canvas;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public final class GLCore implements IGLCore {
-	private final BlockingQueue<ITurnSnapshot> snapshotQue = new LinkedBlockingQueue<ITurnSnapshot>(1);
+	private final BlockingQueue<TurnSnap> snapshotQue = new LinkedBlockingQueue<TurnSnap>(1);
 
 	private LwjglAWTCanvas canvas;
 
@@ -58,7 +57,7 @@ public final class GLCore implements IGLCore {
 	}
 
 	@Override
-	public BlockingQueue<ITurnSnapshot> getSnapshotQue() {
+	public BlockingQueue<TurnSnap> getSnapshotQue() {
 		return snapshotQue;
 	}
 

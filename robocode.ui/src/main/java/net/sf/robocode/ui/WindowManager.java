@@ -12,6 +12,8 @@ import net.sf.robocode.battle.BattleProperties;
 import net.sf.robocode.battle.BattleResultsTableModel;
 import net.sf.robocode.battle.IBattleManager;
 import net.sf.robocode.core.Container;
+import net.sf.robocode.gl.IGLCore;
+import net.sf.robocode.gl.TurnSnap;
 import net.sf.robocode.host.ICpuManager;
 import net.sf.robocode.io.FileUtil;
 import net.sf.robocode.repository.IRepositoryManager;
@@ -193,7 +195,7 @@ public class WindowManager implements IWindowManagerExt {
 				});
 			}
 
-			final BlockingQueue<ITurnSnapshot> snapshotQue = frame.getSnapshotQue();
+			final IGLCore glCore = frame.getGlCore();
 
 			battleManager.addListener(new IBattleListener() {
 				@Override
@@ -231,7 +233,8 @@ public class WindowManager implements IWindowManagerExt {
 				@Override
 				public void onTurnEnded(TurnEndedEvent event) {
 					try {
-						snapshotQue.put(event.getTurnSnapshot());
+						ITurnSnapshot s = event.getTurnSnapshot();
+						glCore.getSnapshotQue().put(new TurnSnap(s));
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
 					}

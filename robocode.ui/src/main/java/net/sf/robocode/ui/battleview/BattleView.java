@@ -11,6 +11,7 @@ package net.sf.robocode.ui.battleview;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import net.sf.robocode.battle.snapshot.RobotSnapshot;
 import net.sf.robocode.gl.IGLCore;
+import net.sf.robocode.gl.TurnSnap;
 import net.sf.robocode.robotpaint.Graphics2DSerialized;
 import net.sf.robocode.robotpaint.IGraphicsProxy;
 import net.sf.robocode.settings.ISettingsManager;
@@ -57,7 +58,7 @@ public class BattleView extends Canvas {
 
 	private final static int ROBOT_TEXT_Y_OFFSET = 24;
 	private final LwjglApplication app;
-	private final BlockingQueue<ITurnSnapshot> snapshotQue;
+	private final IGLCore glCore;
 
 	private BattleRules battleRules;
 	
@@ -131,11 +132,11 @@ public class BattleView extends Canvas {
 		});
 
 		app = glCore.show();
-		snapshotQue = glCore.getSnapshotQue();
+		this.glCore = glCore;
 	}
 
-	public BlockingQueue<ITurnSnapshot> getSnapshotQue() {
-		return snapshotQue;
+	public IGLCore getGlCore() {
+		return glCore;
 	}
 
 	public LwjglApplication getApp() {

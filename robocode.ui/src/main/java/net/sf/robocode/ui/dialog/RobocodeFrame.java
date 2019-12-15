@@ -9,6 +9,8 @@ package net.sf.robocode.ui.dialog;
 
 
 import net.sf.robocode.battle.IBattleManager;
+import net.sf.robocode.gl.IGLCore;
+import net.sf.robocode.gl.TurnSnap;
 import net.sf.robocode.io.Logger;
 import net.sf.robocode.recording.IRecordManager;
 import net.sf.robocode.settings.ISettingsListener;
@@ -58,6 +60,8 @@ public class RobocodeFrame extends JFrame {
 	private static final Cursor DEFAULT_CURSOR = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
 
 	private final EventHandler eventHandler = new EventHandler();
+	private final IGLCore glCore;
+
 	private BattleObserver battleObserver;
 
 	private final InteractiveHandler interactiveHandler;
@@ -98,7 +102,6 @@ public class RobocodeFrame extends JFrame {
 
 	final List<RobotButton> robotButtons = new ArrayList<RobotButton>();
 	private FileDropHandler fileDropHandler;
-	private final BlockingQueue<ITurnSnapshot> snapshotQue;
 
 	public RobocodeFrame(ISettingsManager properties,
 			IWindowManager windowManager,
@@ -118,7 +121,7 @@ public class RobocodeFrame extends JFrame {
 		this.dialogManager = dialogManager;
 		this.recordManager = recordManager;
 		this.battleView = battleView;
-		this.snapshotQue = battleView.getSnapshotQue();
+		this.glCore = battleView.getGlCore();
 		this.menuBar = menuBar;
 		menuBar.setup(this);
 		initialize();
@@ -715,8 +718,8 @@ public class RobocodeFrame extends JFrame {
 		return fileDropHandler;
 	}
 
-	public BlockingQueue<ITurnSnapshot> getSnapshotQue() {
-		return snapshotQue;
+	public IGLCore getGlCore() {
+		return glCore;
 	}
 
 	private class EventHandler implements ComponentListener, ActionListener, ContainerListener, WindowListener,
