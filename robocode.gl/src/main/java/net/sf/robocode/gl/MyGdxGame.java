@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -52,6 +54,13 @@ public final class MyGdxGame extends ApplicationAdapter {
 	private long count = 0;
 	private ExtendViewport viewport;
 
+	private BitmapFont font;
+	private final GlyphLayout fontLayout = new GlyphLayout();
+
+	private boolean drawRobotEnergy = true;
+	private boolean drawRobotName = true;
+
+
 	public MyGdxGame(BlockingQueue<TurnSnap> snapshotQue, float worldWidth, float worldHeight) {
 		this.snapshotQue = snapshotQue;
 		this.worldWidth = worldWidth;
@@ -72,6 +81,9 @@ public final class MyGdxGame extends ApplicationAdapter {
 		robotShader = createRobotShader();
 
 		shapeRenderer = new ShapeRenderer();
+
+		font = new BitmapFont();
+		font.setUseIntegerPositions(false);
 
 		explodeDebris = hiTexture("explode_debris.png");
 
@@ -107,7 +119,12 @@ public final class MyGdxGame extends ApplicationAdapter {
 				if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT)) {
 					if (keycode == Input.Keys.I) {
 						Gdx.graphics.setWindowedMode((int) worldWidth, (int) worldHeight);
+						return true;
 					}
+				} else if (keycode == Input.Keys.TAB) {
+					drawRobotEnergy = !drawRobotEnergy;
+					drawRobotName = !drawRobotName;
+					return true;
 				}
 
 				return false;
@@ -184,6 +201,8 @@ public final class MyGdxGame extends ApplicationAdapter {
 
 		shapeRenderer.dispose();
 
+		font.dispose();
+
 		robotAtlas.dispose();
 		bodyLarge.dispose();
 		explosions.dispose();
@@ -245,7 +264,46 @@ public final class MyGdxGame extends ApplicationAdapter {
 			}
 
 			batch.setShader(null);
+
+			if (drawRobotEnergy) {
+				for (IRobotSnapshot robot : s.getRobots()) {
+					if (robot.getState().isAlive()) {
+						float x = (float) robot.getX();
+						float y = (float) robot.getY();
+
+						String energyString;
+						if (robot.getEnergy() == 0) {
+							energyString = "Disabled";
+						} else {
+							energyString = String.format("%.1f", robot.getEnergy());
+						}
+
+						fontLayout.setText(font, energyString);
+						font.draw(batch, energyString,
+							x - fontLayout.width * .5f,
+							y + 24 + font.getLineHeight() + font.getDescent()
+						);
+					}
+				}
+			}
+
+			if (drawRobotName) {
+				for (IRobotSnapshot robot : s.getRobots()) {
+					if (robot.getState().isAlive()) {
+						float x = (float) robot.getX();
+						float y = (float) robot.getY();
+
+						String name = robot.getVeryShortName();
+						fontLayout.setText(font, name);
+						font.draw(batch, name,
+							x - fontLayout.width * .5f,
+							y - 24 + font.getDescent()
+						);
+					}
+				}
+			}
 		}
+
 
 		private void draw(Batch batch, Texture texture, float textureDx, float textureDy, float rotate, float robotX, float robotY, float scale) {
 			batch.draw(texture,
