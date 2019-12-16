@@ -21,6 +21,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import robocode.control.snapshot.IBulletSnapshot;
 import robocode.control.snapshot.IRobotSnapshot;
 import robocode.control.snapshot.ITurnSnapshot;
@@ -65,7 +66,8 @@ public final class MyGdxGame extends ApplicationAdapter {
 
 	private ViewportFont viewportFont;
 
-	private final Vector2 tmpVector2 = new Vector2();
+	private final Vector2 tmpVec0 = new Vector2();
+	private final Vector2 tmpVec1 = new Vector2();
 
 
 	public MyGdxGame(BlockingQueue<TurnSnap> snapshotQue, float worldWidth, float worldHeight) {
@@ -228,20 +230,39 @@ public final class MyGdxGame extends ApplicationAdapter {
 		stage.getCamera().position.set(worldWidth * .5f, worldHeight * .5f, 0);
 	}
 
+
 	private void drawText(Batch batch, String str, float x, float y) {
+		Viewport viewport = stage.getViewport();
+
+		int w = viewport.getScreenWidth();
+		int h = viewport.getScreenHeight();
+
 		fontLayout.setText(font, str);
 
-		tmpVector2.set(x - fontLayout.width * .5f, y + font.getDescent());
+		tmpVec0.set(x - fontLayout.width * .5f, y + font.getDescent());
+		tmpVec1.set(fontLayout.width, fontLayout.height);
 
-		stage.getViewport().project(tmpVector2);
+		viewport.project(tmpVec0);
+		viewport.project(tmpVec1);
 
-		tmpVector2.x = Math.round(tmpVector2.x);
-		tmpVector2.y = Math.round(tmpVector2.y);
+		if (tmpVec0.x < 0) {
+			tmpVec0.x = 0;
+		} else if (tmpVec0.x > w - tmpVec1.x) {
+			tmpVec0.x = w - tmpVec1.x;
+		}
+		if (tmpVec0.y < tmpVec1.y) {
+			tmpVec0.y = tmpVec1.y;
+		} else if (tmpVec0.y > h) {
+			tmpVec0.y = h;
+		}
 
-		tmpVector2.y = Gdx.graphics.getHeight() - tmpVector2.y - 1;
-		stage.getViewport().unproject(tmpVector2);
+		tmpVec0.x = Math.round(tmpVec0.x);
+		tmpVec0.y = Math.round(tmpVec0.y);
 
-		font.draw(batch, str, tmpVector2.x, tmpVector2.y);
+		tmpVec0.y = Gdx.graphics.getHeight() - tmpVec0.y - 1;
+		viewport.unproject(tmpVec0);
+
+		font.draw(batch, str, tmpVec0.x, tmpVec0.y);
 	}
 
 
