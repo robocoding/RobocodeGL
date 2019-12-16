@@ -14,7 +14,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 
 public final class ViewportFont {
-	private static final int MIN_FONT_SIZE = 8;
+	private static final int MIN_FONT_SIZE = 9;
 
 	private final IntObjectMap<BitmapFont> fonts = new IntObjectOpenHashMap<BitmapFont>();
 	private final LinkedHashSet<Integer> lru = new LinkedHashSet<Integer>();
