@@ -60,6 +60,8 @@ public final class MyGdxGame extends ApplicationAdapter {
 	private boolean drawRobotEnergy = true;
 	private boolean drawRobotName = true;
 
+	private ViewportFont viewportFont;
+
 
 	public MyGdxGame(BlockingQueue<TurnSnap> snapshotQue, float worldWidth, float worldHeight) {
 		this.snapshotQue = snapshotQue;
@@ -82,9 +84,6 @@ public final class MyGdxGame extends ApplicationAdapter {
 
 		shapeRenderer = new ShapeRenderer();
 
-		font = new BitmapFont();
-		font.setUseIntegerPositions(false);
-
 		explodeDebris = hiTexture("explode_debris.png");
 
 		robotAtlas = new TextureAtlas(internal("robot.atlas"), internal(""));
@@ -105,6 +104,8 @@ public final class MyGdxGame extends ApplicationAdapter {
 		camera = new OrthographicCamera();
 		viewport = new ExtendViewport(worldWidth, worldHeight, camera);
 		viewport.apply();
+
+		viewportFont = new ViewportFont(viewport, internal("SourceSansPro-Regular.ttf"));
 
 		stage = new Stage(viewport);
 
@@ -187,6 +188,11 @@ public final class MyGdxGame extends ApplicationAdapter {
 		camera.update();
 		shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
 
+		font = null;
+		if (drawRobotEnergy || drawRobotName) {
+			font = viewportFont.get(10f);
+		}
+
 		// Gdx.gl.glClearColor(.5f, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -201,12 +207,12 @@ public final class MyGdxGame extends ApplicationAdapter {
 
 		shapeRenderer.dispose();
 
-		font.dispose();
-
 		robotAtlas.dispose();
 		bodyLarge.dispose();
 		explosions.dispose();
 		explodeDebris.dispose();
+
+		viewportFont.dispose();
 
 		stage.dispose();
 	}
