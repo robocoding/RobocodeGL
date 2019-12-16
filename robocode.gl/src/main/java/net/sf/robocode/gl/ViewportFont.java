@@ -14,6 +14,8 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 
 public final class ViewportFont {
+	private static final int MIN_FONT_SIZE = 8;
+
 	private final IntObjectMap<BitmapFont> fonts = new IntObjectOpenHashMap<BitmapFont>();
 	private final LinkedHashSet<Integer> lru = new LinkedHashSet<Integer>();
 	private final Viewport viewport;
@@ -36,7 +38,7 @@ public final class ViewportFont {
 		float scale = q.x - p.x;
 
 		int size = Math.round(worldSize * scale);
-		if (size < 3) size = 3;
+		if (size < MIN_FONT_SIZE) size = MIN_FONT_SIZE;
 
 		BitmapFont font = fonts.get(size);
 		if (font != null) {
