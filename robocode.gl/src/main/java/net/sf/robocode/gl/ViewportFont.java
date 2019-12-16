@@ -42,6 +42,8 @@ public final class ViewportFont {
 		if (font != null) {
 			lru.remove(size);
 			lru.add(size);
+
+			font.getData().setScale(1f / scale);
 			return font;
 		}
 
@@ -59,21 +61,21 @@ public final class ViewportFont {
 		parameter.minFilter = Texture.TextureFilter.Linear;
 		parameter.magFilter = Texture.TextureFilter.Linear;
 		font = generator.generateFont(parameter);
-		font.setUseIntegerPositions(true);
-		font.getData().setScale(worldSize / size);
+		font.setUseIntegerPositions(false);
 		generator.dispose();
 
 		fonts.put(size, font);
 		lru.add(size);
 
+		font.getData().setScale(1f / scale);
 		return font;
 	}
 
 	public void dispose() {
-    for (IntObjectCursor<BitmapFont> font : fonts) {
-      font.value.dispose();
-    }
-    fonts.clear();
-    lru.clear();
+		for (IntObjectCursor<BitmapFont> font : fonts) {
+			font.value.dispose();
+		}
+		fonts.clear();
+		lru.clear();
 	}
 }

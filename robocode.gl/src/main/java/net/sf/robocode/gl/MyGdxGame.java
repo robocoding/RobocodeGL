@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
@@ -61,6 +62,8 @@ public final class MyGdxGame extends ApplicationAdapter {
 	private boolean drawRobotName = true;
 
 	private ViewportFont viewportFont;
+
+	private final Vector2 tmpVector2 = new Vector2();
 
 
 	public MyGdxGame(BlockingQueue<TurnSnap> snapshotQue, float worldWidth, float worldHeight) {
@@ -223,6 +226,23 @@ public final class MyGdxGame extends ApplicationAdapter {
 		stage.getCamera().position.set(worldWidth * .5f, worldHeight * .5f, 0);
 	}
 
+	private void drawText(Batch batch, String str, float x, float y) {
+		fontLayout.setText(font, str);
+
+		tmpVector2.set(x - fontLayout.width * .5f, y + font.getDescent());
+
+		stage.getViewport().project(tmpVector2);
+
+		tmpVector2.x = Math.round(tmpVector2.x);
+		tmpVector2.y = Math.round(tmpVector2.y);
+
+		tmpVector2.y = Gdx.graphics.getHeight() - tmpVector2.y - 1;
+		stage.getViewport().unproject(tmpVector2);
+
+		font.draw(batch, str, tmpVector2.x, tmpVector2.y);
+	}
+
+
 	private final class RobotsActor extends Actor {
 		final float bodyLargeDx = bodyLarge.getWidth() * .5f;
 		final float bodyLargeDy = bodyLarge.getHeight() * .5f;
@@ -287,11 +307,7 @@ public final class MyGdxGame extends ApplicationAdapter {
 							energyString = String.format("%.1f", Math.floor(energy * 10. + 0.09) / 10.);
 						}
 
-						fontLayout.setText(font, energyString);
-						font.draw(batch, energyString,
-							x - fontLayout.width * .5f,
-							y + 24 + font.getLineHeight() + font.getDescent()
-						);
+						drawText(batch, energyString, x, y + 24 + font.getLineHeight());
 					}
 				}
 			}
@@ -303,11 +319,7 @@ public final class MyGdxGame extends ApplicationAdapter {
 						float y = (float) robot.getY();
 
 						String name = robot.getVeryShortName();
-						fontLayout.setText(font, name);
-						font.draw(batch, name,
-							x - fontLayout.width * .5f,
-							y - 24 + font.getDescent()
-						);
+						drawText(batch, name, x, y - 24);
 					}
 				}
 			}
