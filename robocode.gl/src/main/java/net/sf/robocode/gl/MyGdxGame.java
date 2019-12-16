@@ -31,6 +31,8 @@ import static java.lang.Math.max;
 import static java.lang.Math.sqrt;
 
 public final class MyGdxGame extends ApplicationAdapter {
+	private static final float FONT_SIZE = 11f;
+
 	private final BlockingQueue<TurnSnap> snapshotQue;
 	private OrthographicCamera camera;
 
@@ -193,7 +195,7 @@ public final class MyGdxGame extends ApplicationAdapter {
 
 		font = null;
 		if (drawRobotEnergy || drawRobotName) {
-			font = viewportFont.get(10f);
+			font = viewportFont.get(FONT_SIZE);
 		}
 
 		// Gdx.gl.glClearColor(.5f, 0, 0, 1);
