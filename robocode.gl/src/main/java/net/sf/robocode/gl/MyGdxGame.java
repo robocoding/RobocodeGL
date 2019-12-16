@@ -271,11 +271,14 @@ public final class MyGdxGame extends ApplicationAdapter {
 						float x = (float) robot.getX();
 						float y = (float) robot.getY();
 
+						double energy = robot.getEnergy();
+
 						String energyString;
 						if (robot.getEnergy() == 0) {
 							energyString = "Disabled";
 						} else {
-							energyString = String.format("%.1f", robot.getEnergy());
+							// energyString = String.format("%.1f", energy);
+							energyString = String.format("%.1f", Math.floor(energy * 10. + 0.09) / 10.);
 						}
 
 						fontLayout.setText(font, energyString);
