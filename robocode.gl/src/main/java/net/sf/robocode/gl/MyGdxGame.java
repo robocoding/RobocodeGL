@@ -22,6 +22,9 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import org.lwjgl.LWJGLException;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
 import robocode.control.snapshot.IBulletSnapshot;
 import robocode.control.snapshot.IRobotSnapshot;
 import robocode.control.snapshot.ITurnSnapshot;
@@ -82,6 +85,8 @@ public final class MyGdxGame extends ApplicationAdapter {
 
 		viewport.setMinWorldWidth(worldWidth);
 		viewport.setMinWorldHeight(worldHeight);
+
+		System.out.println("setWorldSize " + worldWidth + ", " + worldHeight);
 		resize();
 	}
 
@@ -126,7 +131,14 @@ public final class MyGdxGame extends ApplicationAdapter {
 			public boolean keyDown(int keycode) {
 				if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT)) {
 					if (keycode == Input.Keys.I) {
-						Gdx.graphics.setWindowedMode((int) worldWidth, (int) worldHeight);
+						try {
+							Display.setDisplayMode(new DisplayMode((int) worldWidth, (int) worldHeight));
+						} catch (LWJGLException e) {
+							e.printStackTrace();
+						}
+
+						// System.out.println(Thread.currentThread().getId());
+						// Gdx.graphics.setWindowedMode((int) worldWidth, (int) worldHeight);
 						return true;
 					}
 				} else if (keycode == Input.Keys.TAB) {
@@ -176,7 +188,7 @@ public final class MyGdxGame extends ApplicationAdapter {
 	}
 
 	private void resize() {
-		resize(viewport.getScreenWidth(), viewport.getScreenHeight());
+		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 
 	@Override
@@ -185,7 +197,7 @@ public final class MyGdxGame extends ApplicationAdapter {
 			TurnSnap snap = snapshotQue.poll();
 			if (snap != null) {
 				s = snap.snapshot;
-				if (snap.battlefieldWidth * snap.battlefieldHeight > 0) {
+				if (snap.battlefieldWidth > 0 && snap.battlefieldHeight > 0) {
 					setWorldSize(snap.battlefieldWidth, snap.battlefieldHeight);
 				}
 			}
@@ -226,6 +238,10 @@ public final class MyGdxGame extends ApplicationAdapter {
 
 	@Override
 	public void resize(int width, int height) {
+		// System.out.println(Thread.currentThread().getId());
+		System.out.println(width + ", " + height);
+		// new Throwable().printStackTrace(System.out);
+
 		stage.getViewport().update(width, height, false);
 		stage.getCamera().position.set(worldWidth * .5f, worldHeight * .5f, 0);
 	}
